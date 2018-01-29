@@ -1,7 +1,7 @@
 import string
 
 from pyparsing import (
-    Literal, Word, alphanums, Forward, Group, SkipTo, QuotedString, Combine 
+    Literal, Word, alphanums, Forward, Group, SkipTo, QuotedString, Combine,
     Optional, OneOrMore, ZeroOrMore, pythonStyleComment)
 
 
