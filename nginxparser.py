@@ -1,7 +1,7 @@
 import string
 
 from pyparsing import (
-    Literal, White, Word, alphanums, CharsNotIn, Forward, Group, SkipTo,
+    Literal, Word, alphanums, Forward, Group, SkipTo, QuotedString, Combine 
     Optional, OneOrMore, ZeroOrMore, pythonStyleComment)
 
 
@@ -11,38 +11,26 @@ class NginxParser(object):
     """
 
     # constants
+
     left_bracket = Literal("{").suppress()
     right_bracket = Literal("}").suppress()
     semicolon = Literal(";").suppress()
-    space = White().suppress()
-    key = Word(alphanums + "_/")
-    value = CharsNotIn("{};")
-    value2 = CharsNotIn(";")
-    location = CharsNotIn("{};," + string.whitespace)
-    ifword = Literal("if")
-    setword = Literal("set")
-    # modifier for location uri [ = | ~ | ~* | ^~ ]
-    modifier = Literal("=") | Literal("~*") | Literal("~") | Literal("^~")
 
-    # rules
-    assignment = (key + Optional(space + value) + semicolon)
-    setblock = (setword + OneOrMore(space + value2) + semicolon)
+    key = Word(alphanums + "_/")
+    value = QuotedString(quoteChar='"', escChar='\\') \
+          | QuotedString(quoteChar="'", escChar='\\') \
+          | Word(alphanums + "*_/.-+$:")
+    assignment = (key + Group(OneOrMore(value)) + semicolon)
     block = Forward()
-    ifblock = Forward()
     subblock = Forward()
 
-    ifblock << (
-        Group(ifword + Optional(space) + Optional(value) + SkipTo('{'))
-        + left_bracket
-        + Group(subblock)
-        + right_bracket)
-
     subblock << ZeroOrMore(
-        Group(assignment) | block | Group(ifblock) | setblock
+        Group(assignment) | block
     )
 
     block << Group(
-        Group(key + Optional(space + modifier) + Optional(space + location))
+        key
+        + SkipTo('{')
         + left_bracket
         + Group(subblock)
         + right_bracket
