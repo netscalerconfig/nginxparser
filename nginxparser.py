@@ -20,7 +20,7 @@ class NginxParser(object):
     value = QuotedString(quoteChar='"', escChar='\\') \
           | QuotedString(quoteChar="'", escChar='\\') \
           | Word(alphanums + "*_/.-+$:=")
-    assignment = (key + Group(OneOrMore(value)) + semicolon)
+    assignment = (key + Group(ZeroOrMore(value)) + semicolon)
     block = Forward()
     subblock = Forward()
 
